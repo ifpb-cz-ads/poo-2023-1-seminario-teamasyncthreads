@@ -24,9 +24,16 @@ public class CompletableFutureTest {
 
         CompletableFuture<BigInteger> fatorialFuture = future.thenCompose(number -> calcularFatorial(number));
 
-        CompletableFuture<String> resultadoFinalFuture = fatorialFuture.thenApply(fatorial -> {
-            return "O fatorial do número gerado foi: " + fatorial;
+        CompletableFuture<BigInteger> fallbackFuture = fatorialFuture.exceptionally(ex -> {
+            System.out.println("Ocorreu uma exceção: " + ex.getMessage());
+            return BigInteger.ZERO; // Valor de fallback, caso ocorra uma exceção
+        });
+
+        CompletableFuture<String> resultadoFinalFuture = fallbackFuture.thenApply(fatorial -> {
+            return "O fatorial do número 1 gerado foi: " + fatorial;
         }); 
+
+        
 
         CompletableFuture<Void> finalFuture = resultadoFinalFuture.thenAccept(resultado -> {
             System.out.println("Tarefa 1 completa!");
@@ -45,10 +52,14 @@ public class CompletableFutureTest {
                 }
             })
             .thenCompose(number -> calcularFatorial(number))
+            .exceptionally(ex -> {
+                System.out.println("Ocorreu uma exceção: " + ex.getMessage());
+                return BigInteger.ZERO; // Valor de fallback, caso ocorra uma exceção
+            })
             .thenApply(fatorial -> "O fatorial do número gerado foi: " + fatorial)
             .thenAccept(fatorial -> {
                 System.out.println("Tarefa 2 completa!");
-                System.out.println("O fatorial do número gerado foi: " + fatorial);
+                System.out.println("O fatorial do número 2 gerado foi: " + fatorial);
             }); 
 
         finalFuture.join();
